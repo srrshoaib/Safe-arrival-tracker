@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Arrival Tracker</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #0b1220;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+
+    .app {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 24px;
+      background: #172033;
+      border-radius: 20px;
+      border: 1px solid #334155;
+    }
+
+    h1 {
+      color: #6ee7b7;
+      font-size: 27px;
+    }
+
+    p {
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #10b981;
+      color: #052e24;
+    }
+
+    .secondary {
+      background: #334155;
+      color: white;
+    }
+
+    .success {
+      background: #86efac;
+      color: #14532d;
+    }
+
+    #status {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #0f172a;
+      overflow-wrap: anywhere;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <h1>🛡️ Safe Arrival</h1>
+
+    <p>
+      Share your journey with people you trust
+      and let them know when you arrive safely.
+    </p>
+
+    <label for="traveller">Your name</label>
+    <input id="traveller" placeholder="Enter your name">
+
+    <label for="destination">Destination</label>
+    <input id="destination" placeholder="e.g. Chittagong">
+
+    <label for="contact">Who do you want to notify?</label>
+    <select id="contact">
+      <option value="wife">Wife</option>
+      <option value="mother">Mother</option>
+      <option value="father">Father</option>
+      <option value="brother">Brother</option>
+      <option value="sister">Sister</option>
+      <option value="friend">Friend</option>
+    </select>
+
+    <label for="email">Recipient's Gmail</label>
+    <input id="email" type="email" placeholder="example@gmail.com">
+
+    <button class="primary" onclick="startJourney()">
+      📍 Start Journey
+    </button>
+
+    <button class="secondary" onclick="shareLocation()">
+      🗺️ Share My Current Location
+    </button>
+
+    <button class="success" onclick="arrivedSafely()">
+      ✅ YES, I ARRIVED
+    </button>
+
+    <div id="status">
+      Your journey has not started yet.
+    </div>
+
+    <p class="small">
+      Location sharing requires your permission.
+      Your location should only be shared with people you trust.
+    </p>
+  </main>
+
+  <script>
+    let journeyStarted = false;
+    let currentPosition = null;
+
+    function startJourney() {
+      const name = document.getElementById("traveller").value.trim();
+      const destination = document.getElementById("destination").value.trim();
+
+      if (!name || !destination) {
+        alert("Please enter your name and destination.");
+        return;
+      }
+
+      journeyStarted = true;
+
+      document.getElementById("status").textContent =
+        "Journey started! " + name +
+        " is travelling to " + destination + ".";
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            currentPosition = position;
+
+            document.getElementById("status").textContent +=
+              " Location permission granted.";
+          },
+          function() {
+            alert("Location permission was not granted.");
+          }
+        );
+      }
+    }
+
+    function shareLocation() {
+      if (!navigator.geolocation) {
+        alert("Your browser does not support location.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          const mapLink =
+            "https://maps.google.com/?q=" + lat + "," + lon;
+
+          document.getElementById("status").innerHTML =
+            'Current location ready: <a target="_blank" rel="noopener" href="' +
+            mapLink +
+            '" style="color:#6ee7b7">Open location in Google Maps</a>';
+
+          if (confirm("Open the location link to share it yourself?")) {
+            window.open(mapLink, "_blank");
+          }
+        },
+        function() {
+          alert("Could not get your location. Allow location access in your browser.");
+        },
+        { enableHighAccuracy: true, timeout: 15000 }
+      );
+    }
+
+    function arrivedSafely() {
+      if (!journeyStarted) {
+        alert("Please start your journey first.");
+        return;
+     
